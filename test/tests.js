@@ -138,4 +138,27 @@ describe('z-schema-errors', function(){
       message.should.equal("Error!!! 'Expected type number but found type string' on property items[0] (The item).");
     });
   });
+
+  describe('multiple errors', function(){
+    var reporter = zschemaErrors.init();
+
+    it('should report errors separated by (also)', function(){
+      var error1 = {
+        code: 'INVALID_TYPE',
+        path: '#/items/[0]',
+        description: 'The item',
+        message: 'Expected type number but found type string'
+      };
+
+      var error2 = {
+        code: 'INVALID_FORMAT',
+        path: '#/letterA',
+        description: 'The letter A',
+        message: 'Object didn\'t pass validation for format ^a$: b'
+      };
+
+      var message = reporter.extractMessage({ errors: [error1, error2] });
+      message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (The item). (also) An error occurred 'Object didn't pass validation for format ^a$: b' on property letterA (The letter A).");
+    });
+  });
 });
