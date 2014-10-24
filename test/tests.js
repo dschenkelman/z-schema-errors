@@ -120,4 +120,22 @@ describe('z-schema-errors', function(){
       message.should.equal("The item @ items[0] has an invalid type. Error: Expected type number but found type string");
     });
   });
+
+  describe('customize context message', function(){
+    var reporter = zschemaErrors.init({
+      contextMessage: 'Error!!!'
+    });
+
+    it('should report using custom format and extractor', function(){
+      var error = {
+        code: 'INVALID_TYPE',
+        path: '#/items/[0]',
+        description: 'The item',
+        message: 'Expected type number but found type string'
+      };
+
+      var message = reporter.extractMessage({ errors: [error] });
+      message.should.equal("Error!!! 'Expected type number but found type string' on property items[0] (The item).");
+    });
+  });
 });
