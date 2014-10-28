@@ -160,6 +160,27 @@ if (!isValid){
 }
 ```
 
+Missing parts
+-------------------
+You probably want to avoid generating some characters if a part is missing. Given a part, such as `{path}`, if the output for it is empty you can specify `{^path}` and `{$path}` so the content between the two will be removed.
+
+>If the beggining and end of different parts intersect, then one must be a superset of the other.
+
+For example, given the default format `"DEFAULT: '{context} \'{message}\'{^path} on property {path}{^description} ({description}){$description}{$path}.'"` the following code snippet results in:
+
+```javascript
+var error = {
+    code: 'INVALID_TYPE',
+    description: 'The item',
+    message: 'Expected type number but found type string',
+};
+
+var message = reporter.extractMessage({ errors: [error] });
+console.log(message); // prints "An error occurred 'Expected type number but found type string'."
+```
+
+>Note that the description is also missing, even if it is available in the message.
+
 Contributing
 ---------
 Pull requests and issues are more than welcome. When submitting a PR make sure to run the tests:

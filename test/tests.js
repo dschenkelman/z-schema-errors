@@ -56,6 +56,28 @@ describe('z-schema-errors', function(){
       var message = reporter.extractMessage({ errors: [error] });
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (The item).");
     });
+
+    it('should remove string between {^path} and {$path} if path is missing', function(){
+      var error = {
+        code: 'INVALID_TYPE',
+        description: 'The item',
+        message: 'Expected type number but found type string',
+      };
+
+      var message = reporter.extractMessage({ errors: [error] });
+      message.should.equal("An error occurred 'Expected type number but found type string'.");
+    });
+
+    it('should remove string between {^description} and {$description} if description is missing', function(){
+      var error = {
+        code: 'INVALID_TYPE',
+        path: '#/items/[0]',
+        message: 'Expected type number but found type string'
+      };
+
+      var message = reporter.extractMessage({ errors: [error] });
+      message.should.equal("An error occurred 'Expected type number but found type string' on property items[0].");
+    });
   });
 
   describe('customize extractors', function(){
@@ -74,7 +96,7 @@ describe('z-schema-errors', function(){
       };
 
       var message = reporter.extractMessage({ errors: [error] });
-      message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] Description: The item.");
+      message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (Description: The item).");
     });
   });
 
