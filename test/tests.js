@@ -48,7 +48,7 @@ describe('z-schema-errors', function(){
     it('should correctly report array elements', function(){
       var error = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         description: 'The item',
         message: 'Expected type number but found type string'
       };
@@ -71,7 +71,7 @@ describe('z-schema-errors', function(){
     it('should remove string between {^description} and {$description} if description is missing', function(){
       var error = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         message: 'Expected type number but found type string'
       };
 
@@ -90,7 +90,7 @@ describe('z-schema-errors', function(){
     it('should report description from custom extractor', function(){
       var error = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         description: 'The item',
         message: 'Expected type number but found type string'
       };
@@ -110,7 +110,7 @@ describe('z-schema-errors', function(){
     it('should report using custom format', function(){
       var error = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         description: 'The item',
         message: 'Expected type number but found type string'
       };
@@ -133,7 +133,7 @@ describe('z-schema-errors', function(){
     it('should report using custom format and extractor', function(){
       var error = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         description: 'The item',
         message: 'Expected type number but found type string'
       };
@@ -151,7 +151,7 @@ describe('z-schema-errors', function(){
     it('should report using custom format and extractor', function(){
       var error = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         description: 'The item',
         message: 'Expected type number but found type string'
       };
@@ -167,7 +167,7 @@ describe('z-schema-errors', function(){
     it('should report errors separated by (also)', function(){
       var error1 = {
         code: 'INVALID_TYPE',
-        path: '#/items/[0]',
+        path: '#/items/0',
         description: 'The item',
         message: 'Expected type number but found type string'
       };
