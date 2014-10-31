@@ -183,4 +183,42 @@ describe('z-schema-errors', function(){
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (The item). (also) An error occurred 'Object didn't pass validation for format ^a$: b' on property letterA (The letter A).");
     });
   });
+
+  describe('inner error', function(){
+    var reporter = zschemaErrors.init({
+      formats: {
+        'ANY_OF_MISSING': '{context} \'None of the valid schemas were met\'{^path} on property {path} ({description}){$path}.{^inner} Inner errors: [ {inner} ].{$inner}'
+      }
+    });
+    it('should handle inner errors', function(){
+      var report = {
+        errors: [
+        {
+          code: 'ANY_OF_MISSING',
+          params: [],
+          message: 'Data does not match any schemas from \'anyOf\'',
+          path: '#/',
+          inner: [
+            {
+              code: 'INVALID_TYPE',
+              params: [ 'string', 'boolean' ],
+              message: 'Expected type string but found type boolean',
+              path: '#/given_name',
+              description: 'The user\'s user given name(s)'
+            },
+            {
+              code: 'INVALID_TYPE',
+              params: [ 'string', 'boolean' ],
+              message: 'Expected type string but found type boolean',
+              path: '#/given_name',
+              description: 'The user\'s user given name(s)'
+            }
+          ]
+        }]
+      };
+
+      var message = reporter.extractMessage(report);
+      message.should.equal("An error occurred 'None of the valid schemas were met'. Inner errors: [ An error occurred 'Expected type string but found type boolean' on property given_name (The user's user given name(s)). ].");
+    });
+  });
 });
