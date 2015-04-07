@@ -78,6 +78,17 @@ describe('z-schema-errors', function(){
       var message = reporter.extractMessage({ errors: [error] });
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0].");
     });
+
+    it('should allow multiple params with indexes', function(){
+      var error = {
+        code: 'OBJECT_DEPENDENCY_KEY',
+        message: 'Dependency failed - key must exist: email (due to key: verify_email)',
+        params: [ 'email', 'verify_email' ]
+      };
+
+      var message = reporter.extractMessage({ errors: [error] });
+      message.should.equal("An error occurred 'Property email is mandatory if property verify_email is included'.");
+    });
   });
 
   describe('customize extractors', function(){

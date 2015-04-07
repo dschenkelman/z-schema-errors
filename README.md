@@ -13,9 +13,10 @@ Introduction
 This module aims to standarize how messages are created for reports. It:
 * Automatically transforms nested properties and array elements in `path` into a friendly notation that can be understood by programmers. For example `path: '#/items/[0]'` becomes `items[0]`.
 * Extracts the first nested array in `params`.
-* Allows users to customize message format on an error code basis, specifying where to place different properties using macros. Supported macros are: `{message}`, `{path}`, `{description}`, `{params}`.
+* Allows users to customize message format on an error code basis, specifying where to place different properties using macros. Supported macros are: `{message}`, `{path}`, `{description}`, `{params[i]}`.
+    > The value of `i` in params must be the index of the element in the `params` array. If `params` is not an array then use `params[0]`.
 * Allows users to provide a `contextMessage` to be included in all errors through the `{contextMessage}` macro.
-* Allows user to specify how the values for `{message}`, `{path}`, `{description}`, `{params}` are generated.
+* Allows user to specify how the values for `{message}`, `{path}`, `{description}`, `{params[i]}` are generated.
 
 > To check the defaults take a look at the [source code](https://github.com/dschenkelman/z-schema-errors/blob/master/lib/index.js#L8-L30).
 
