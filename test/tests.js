@@ -17,7 +17,7 @@ describe('z-schema-errors', function(){
         description: 'The elements'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Invalid property \"invalid_value\"' on property elements (The elements).");
     });
 
@@ -29,7 +29,7 @@ describe('z-schema-errors', function(){
         message: 'Object didn\'t pass validation for format ^a$: b'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Object didn\'t pass validation for format ^a$: b' on property letterA (The letter A).");
     });
 
@@ -41,7 +41,7 @@ describe('z-schema-errors', function(){
         message: 'Object didn\'t pass validation for format ^a$: b'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Object didn\'t pass validation for format ^a$: b' on property parent.child.letterA (The letter A).");
     });
 
@@ -53,7 +53,7 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (The item).");
     });
 
@@ -64,7 +64,7 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string',
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Expected type number but found type string'.");
     });
 
@@ -75,7 +75,7 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0].");
     });
 
@@ -86,7 +86,7 @@ describe('z-schema-errors', function(){
         params: [ 'email', 'verify_email' ]
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Property email is mandatory if property verify_email is included'.");
     });
   });
@@ -94,7 +94,7 @@ describe('z-schema-errors', function(){
   describe('customize extractors', function(){
     var reporter = zschemaErrors.init({
       extractors: {
-        description: function(d){ return 'Description: ' + d; }
+        description: function(args){ return 'Description: ' + args.part; }
       }
     });
 
@@ -106,7 +106,7 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (Description: The item).");
     });
   });
@@ -126,7 +126,7 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("items[0] has an invalid type. Error: Expected type number but found type string");
     });
   });
@@ -137,7 +137,7 @@ describe('z-schema-errors', function(){
         'INVALID_TYPE': '{description} @ {path} has an invalid type. Error: {message}'
       },
       extractors: {
-        description: function(d){ return d; }
+        description: function(args){ return args.part; }
       }
     });
 
@@ -149,8 +149,34 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("The item @ items[0] has an invalid type. Error: Expected type number but found type string");
+    });
+  });
+
+  describe('provide context to extractors', function(){
+    var reporter = zschemaErrors.init({
+      formats: {
+        'INVALID_TYPE': '{description} @ {path} has an invalid type. Error: {message}'
+      },
+      extractors: {
+        description: function(args){ return args.context.value; }
+      }
+    });
+
+    it('should be able to use context in extractors', function(){
+      var error = {
+        code: 'INVALID_TYPE',
+        path: '#/items/0',
+        description: 'The item',
+        message: 'Expected type number but found type string'
+      };
+
+      var ctx = { value: 'The element' };
+
+      var message = reporter.extractMessage({ report: { errors: [error] }, context: ctx });
+      // note that it starts 'The element'
+      message.should.equal("The element @ items[0] has an invalid type. Error: Expected type number but found type string");
     });
   });
 
@@ -167,7 +193,7 @@ describe('z-schema-errors', function(){
         message: 'Expected type number but found type string'
       };
 
-      var message = reporter.extractMessage({ errors: [error] });
+      var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("Error!!! 'Expected type number but found type string' on property items[0] (The item).");
     });
   });
@@ -190,18 +216,19 @@ describe('z-schema-errors', function(){
         message: 'Object didn\'t pass validation for format ^a$: b'
       };
 
-      var message = reporter.extractMessage({ errors: [error1, error2] });
+      var message = reporter.extractMessage({ report: { errors: [error1, error2] } });
       message.should.equal("An error occurred 'Expected type number but found type string' on property items[0] (The item). (also) An error occurred 'Object didn't pass validation for format ^a$: b' on property letterA (The letter A).");
     });
   });
 
   describe('inner error', function(){
-    var reporter = zschemaErrors.init({
-      formats: {
-        'ANY_OF_MISSING': '{context} \'None of the valid schemas were met\'{^path} on property {path} ({description}){$path}.{^inner} Inner errors: [ {inner} ].{$inner}'
-      }
-    });
     it('should handle inner errors', function(){
+      var reporter = zschemaErrors.init({
+        formats: {
+          'ANY_OF_MISSING': '{context} \'None of the valid schemas were met\'{^path} on property {path} ({description}){$path}.{^inner} Inner errors: [ {inner} ].{$inner}'
+        }
+      });
+
       var report = {
         errors: [
         {
@@ -228,7 +255,47 @@ describe('z-schema-errors', function(){
         }]
       };
 
-      var message = reporter.extractMessage(report);
+      var message = reporter.extractMessage({ report:  report });
+      message.should.equal("An error occurred 'None of the valid schemas were met'. Inner errors: [ An error occurred 'Expected type string but found type boolean' on property given_name (The user's user given name(s)). ].");
+    });
+
+    it('should have context in inner errors', function(){
+      var reporter = zschemaErrors.init({
+        formats: {
+          'ANY_OF_MISSING': '{context} \'None of the valid schemas were met\'{^path} on property {path} ({description}){$path}.{^inner} Inner errors: [ {inner} ].{$inner}'
+        },
+        extractors: {
+          description: function(args) { return args.context && args.context.has_description ? args.part : 'no description'; }
+        }
+      });
+
+      var report = {
+        errors: [
+        {
+          code: 'ANY_OF_MISSING',
+          params: [],
+          message: 'Data does not match any schemas from \'anyOf\'',
+          path: '#/',
+          inner: [
+            {
+              code: 'INVALID_TYPE',
+              params: [ 'string', 'boolean' ],
+              message: 'Expected type string but found type boolean',
+              path: '#/given_name',
+              description: 'The user\'s user given name(s)'
+            },
+            {
+              code: 'INVALID_TYPE',
+              params: [ 'string', 'boolean' ],
+              message: 'Expected type string but found type boolean',
+              path: '#/given_name',
+              description: 'The user\'s user given name(s)'
+            }
+          ]
+        }]
+      };
+
+      var message = reporter.extractMessage({ report:  report, context: { has_description: true } });
       message.should.equal("An error occurred 'None of the valid schemas were met'. Inner errors: [ An error occurred 'Expected type string but found type boolean' on property given_name (The user's user given name(s)). ].");
     });
   });

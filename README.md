@@ -46,7 +46,7 @@ if (!isValid){
     //     ]
     // };
 
-    var errorMessage = reporter.extractMessage(validator.lastReport);
+    var errorMessage = reporter.extractMessage({ report: validator.lastReport });
 
     console.log(errorMessage);
     // prints "An error occurred 'Invalid property \"invalid_value\"' on property elements (The elements)."
@@ -82,7 +82,7 @@ if (!isValid){
     //          }
     //     ]
     // };
-    var errorMessage = reporter.extractMessage(validator.lastReport);
+    var errorMessage = reporter.extractMessage({ report: validator.lastReport });
 
     console.log(errorMessage);
     // prints "items[0] has an invalid type. Error: Expected type number but found type string"
@@ -99,7 +99,7 @@ var ZSchemaErrors = require('z-schema-errors');
 var validator = new ZSchema();
 var reporter = ZSchemaErrors.init({
     extractors: {
-        description: function(d){ return 'Description: ' + d; }
+        description: function(args){ return 'Description: ' + args.part; }
     }
 });
 
@@ -118,7 +118,7 @@ if (!isValid){
     //          }
     //     ]
     // };
-    var errorMessage = reporter.extractMessage(validator.lastReport);
+    var errorMessage = reporter.extractMessage({ report: validator.lastReport });
 
     console.log(errorMessage);
     // prints "An error occurred 'Expected type number but found type string' on property items[0] Description: The item."
@@ -154,7 +154,7 @@ if (!isValid){
     //          }
     //     ]
     // };
-    var errorMessage = reporter.extractMessage(validator.lastReport);
+    var errorMessage = reporter.extractMessage({ report: validator.lastReport });
 
     console.log(errorMessage);
     // prints ""Error!!! 'Expected type number but found type string' on property items[0] (The item)."
@@ -176,11 +176,47 @@ var error = {
     message: 'Expected type number but found type string',
 };
 
-var message = reporter.extractMessage({ errors: [error] });
+var message = reporter.extractMessage({ report: { errors: [error] } });
 console.log(message); // prints "An error occurred 'Expected type number but found type string'."
 ```
 
 >Note that the description is also missing, even if it is available in the message.
+
+Context for extractors
+-------------------
+In some scenarios you might require additional information in order to create error messages (e.g. the HTTP route that failed validation). That can be passed as the `context` parameter:
+```javascript
+var ZSchema = require('z-schema');
+var ZSchemaErrors = require('z-schema-errors');
+
+var validator = new ZSchema();
+var reporter = ZSchemaErrors.init({
+    extractors: {
+        description: function(args){ return args.context.show_description ? ('Description: ' + d) : 'none'; }
+    }
+});
+
+var isValid = validator.validate(json, schema);
+
+if (!isValid){
+    console.log(validator.lastReport);
+    // {
+    //    errors:
+    //    [
+    //          {
+    //              code: 'INVALID_TYPE',
+    //              path: '#/items/[0]',
+    //              description: 'The item',
+    //              message: 'Expected type number but found type string'
+    //          }
+    //     ]
+    // };
+    var errorMessage = reporter.extractMessage({ report: validator.lastReport, context: { show_description: true } });
+
+    console.log(errorMessage);
+    // prints "An error occurred 'Expected type number but found type string' on property items[0] Description: The item."
+}
+```
 
 Contributing
 ---------
