@@ -89,6 +89,19 @@ describe('z-schema-errors', function(){
       var message = reporter.extractMessage({ report: { errors: [error] } });
       message.should.equal("An error occurred 'Property email is mandatory if property verify_email is included'.");
     });
+
+    it('should not throw if path is not string', function(){
+      // test for https://github.com/dschenkelman/z-schema-errors/issues/2
+      var error ={
+        code: 'KEYWORD_UNDEFINED_STRICT',
+        params: [ 'type' ],
+        message: 'Keyword \'type\' must be defined in strict mode',
+        path: []
+      };
+
+      var message = reporter.extractMessage({ report: { errors: [error] } });
+      message.should.equal("An error occurred 'Keyword 'type' must be defined in strict mode'.");
+    });
   });
 
   describe('customize extractors', function(){
