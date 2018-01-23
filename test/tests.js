@@ -21,6 +21,18 @@ describe('z-schema-errors', function(){
       message.should.equal("An error occurred 'Invalid property \"invalid_value\"' on property elements (The elements).");
     });
 
+    it('should return default message for ENUM_MISMATCH code (empty string)', function(){
+      var error = {
+        code: 'ENUM_MISMATCH',
+        params: [ '' ],
+        path: '#/elements',
+        description: 'The elements'
+      };
+
+      var message = reporter.extractMessage({ report: { errors: [error] } });
+      message.should.equal("An error occurred 'Invalid property \"\"' on property elements (The elements).");
+    });
+
     it('should return default message for any other code', function(){
       var error = {
         code: 'INVALID_FORMAT',
